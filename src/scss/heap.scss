@@ -1,0 +1,103 @@
+.heap {
+    position: relative;
+    width: calc(var(--heap-width) + var(--address-padding) + var(--scrollbar-padding));
+    height: 100%;
+
+    &__container {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+
+        width: 100%;
+        // width: calc(var(--heap-width) + var(--address-padding) + var(--scrollbar-padding));
+        height: 85%;
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: flex-end;
+        border-top: none;
+        overflow-y: scroll;
+        // overflow-y: auto;
+
+        &::-webkit-scrollbar {
+            width: var(--scrollbar-width);
+        }
+          
+        /* Track */
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        /* Handle */
+        &::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+          
+        /* Handle on hover */
+        &::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    }
+
+    &__border {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: calc(var(--heap-width) - var(--scrollbar-width));
+        transform: translate(calc(var(--address-padding)), -50%);
+        height: 85%;
+        border: 3px solid white;
+        border-top: none;
+        pointer-events: none;
+    }
+
+    .block {
+        &--bottom {
+            width: 100%;
+            background: white;
+            min-height: 20px;
+            margin-right: var(--scrollbar-padding);
+        }
+
+        &__container {
+            width: calc(100% - var(--address-padding) - var(--scrollbar-padding));
+            margin-right: var(--scrollbar-padding);
+        }
+
+        &__wrapper {
+            position: relative;
+            width: 100%;
+            border: 1px solid rgba($color: black, $alpha: .5);
+        }
+
+        &__address {
+            position: absolute;
+            font-size: 12px;
+            transform: translateX(-120%) translateY(-50%);
+            left: 0;
+
+            &--top {
+                top: 0%;
+            }
+
+            &--bot {
+                top: 100%;
+            }
+        }
+
+        &__info {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            background: rgba($color: white, $alpha: .8);
+            width: 100%;
+            height: 100%;
+        }
+
+        &__control-struct {
+            position: relative;
+            background: rgba($color: white, $alpha: .6);
+        }
+    }
+}

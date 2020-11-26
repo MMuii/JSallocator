@@ -1,22 +1,53 @@
-import React from "react"
-import { Link } from "gatsby"
+import React, { useEffect } from 'react';
+import { useTerminal } from '../hooks/useTerminal';
+import { useHeap } from '../hooks/useHeap';
+import Heap from '../components/Heap';
+import Terminal from '../components/Terminal';
+import Div100vh from 'react-div-100vh';
 
-import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
+const IndexPage = () => {
+    const [heap, debug, sizes, settings, dispatch] = useHeap();
+    const [terminal, log, clearTerminal] = useTerminal();
+    
+    useEffect(() => {
+        console.table(heap);
+    }, [heap]);
 
-const IndexPage = () => (
-  <Layout>
-    <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
-    </div>
-    <Link to="/page-2/">Go to page 2</Link> <br />
-    <Link to="/using-typescript/">Go to "Using TypeScript"</Link>
-  </Layout>
-)
+    // useEffect(() => {
+    //     console.log('history', history);
+    // }, [history])
 
-export default IndexPage
+    useEffect(() => {
+        const listener = e => {
+            if (e.key === 'q') {
+                console.log('debug', debug)
+            }
+        }
+
+        document.addEventListener('keypress', listener);
+        
+        return () => document.removeEventListener('keypress', listener);
+    });
+
+    return (
+        <Div100vh className="container">
+            <Terminal 
+                heap={heap}
+                settings={settings}
+                dispatch={dispatch}
+                terminal={terminal}
+                log={log}
+                clearTerminal={clearTerminal}
+            />
+
+            <Heap 
+                heap={heap}
+                sizes={sizes}
+                scale={settings.scale}
+                addressBase={settings.addressBase}
+            />
+        </Div100vh>
+    )
+}
+
+export default IndexPage;
