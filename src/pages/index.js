@@ -31,21 +31,23 @@ const IndexPage = () => {
 
     return (
         <Div100vh className="container">
-            <Terminal 
-                heap={heap}
-                settings={settings}
-                dispatch={dispatch}
-                terminal={terminal}
-                log={log}
-                clearTerminal={clearTerminal}
-            />
+            <div className="wrapper">
+                <Terminal 
+                    heap={heap}
+                    settings={settings}
+                    dispatch={dispatch}
+                    terminal={terminal}
+                    log={log}
+                    clearTerminal={clearTerminal}
+                />
 
-            <Heap 
-                heap={heap}
-                sizes={sizes}
-                scale={settings.scale}
-                addressBase={settings.addressBase}
-            />
+                <Heap 
+                    heap={heap}
+                    sizes={sizes}
+                    scale={settings.scale}
+                    addressBase={settings.addressBase}
+                />
+            </div>
         </Div100vh>
     )
 }

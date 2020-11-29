@@ -83,12 +83,12 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
     
     const address = num => (settings.addressBase === 'dec') ? num : '0x' + num.toString(16).toUpperCase(); 
  
-    const logBlockTemplate = ({name, size, free, structAddressStart, structAddressEnd}) => [
+    const logBlockTemplate = ({name, size, free, structStart, blockStart}) => [
         `name: ${name}`,
         `size: ${size}`,
         `free: ${free ? 'true' : 'false'}`,
-        `control struct starts at address: ${address(structAddressStart)}`,
-        `allocated memory starts at address: ${address(structAddressEnd)}`,
+        `control struct starts at address: ${address(structStart)}`,
+        `allocated memory starts at address: ${address(blockStart)}`,
     ]
 
     const malloc = ([name, size]) => {

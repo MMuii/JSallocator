@@ -45,11 +45,29 @@ time, mark, audio, video {
 }
 
 .container {
-    width: 70%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    // grid-template-columns: ;
+    // width: 70%;
+    // margin: 0 auto;
+    // display: grid;
+    // place-items: center center;
+    // grid-template-columns: 1fr 1fr;
+
+    // button {
+    //     width: min-content;
+    //     height: min-content;
+    // }
+}
+
+.wrapper {
+    height: 100%;
+    width: 80%;
     margin: 0 auto;
     display: grid;
     place-items: center center;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(400px, 1fr) 1fr;
 
     button {
         width: min-content;

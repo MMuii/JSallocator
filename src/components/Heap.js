@@ -28,22 +28,27 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                     className="block__container"
                     key={block.name} 
                 >
+                    <div className="block__fence block__fence--second">
+                        fence
+                        <div className="block__address block__address--top">{address(block.secondFenceEnd)}</div>
+                        <div className="block__address block__address--bot">{address(block.secondFenceStart)}</div>
+                    </div>
+
                     <div className="block__wrapper">
-                        <div style={{ minHeight: block.next 
-                                        ? (block.next.structAddressStart - block.blockAddressEnd) * scale
-                                        : 0 }} 
-                        />
                         <div 
                             className="block__info"
                             style={{ minHeight: calculateSize(block.size) }}
                         >   
-                            <div className="block__address block__address--top">
-                                {address(block.blockAddressEnd)}
-                            </div>
                             <p>name: {block.name}</p>
                             <p>size: {block.size}</p>
                             <p>free: {block.free ? 'true' : 'false'}</p>
                         </div>
+                    </div>
+
+                    <div className="block__fence block__fence--first">
+                        fence
+                        <div className="block__address block__address--top">{address(block.blockStart)}</div>
+                        <div className="block__address block__address--bot">{address(block.firstFenceStart)}</div>
                     </div>
 
                     <div 
@@ -51,11 +56,10 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                         style={{ minHeight: sizes.BLOCK_STRUCT_SIZE }}
                     >
                         <p>control struct</p>
-                        <div className="block__address block__address--top">{address(block.structAddressEnd)}</div>
                         <div className="block__address block__address--bot">
-                            {(block.prev && block.prev.blockAddressEnd === block.structAddressStart) 
+                            {(block.prev && block.prev.secondFenceEnd === block.structStart) 
                                 ? '' 
-                                : address(block.structAddressStart)}
+                                : address(block.structStart)}
                         </div>
                     </div>
                 </div>

@@ -45,7 +45,6 @@
     &__border {
         position: absolute;
         top: 50%;
-        // top: calc(50% + 2px);
         left: -3px;
         width: calc(var(--heap-width) - var(--scrollbar-width) + 6px);
         transform: translate(calc(var(--address-padding)), -50%);
@@ -73,12 +72,12 @@
         &__wrapper {
             position: relative;
             width: 100%;
-            border: 1px solid rgba($color: black, $alpha: .5);
+            // border: 1px solid rgba($color: black, $alpha: .5);
         }
 
         &__address {
             position: absolute;
-            font-size: 12px;
+            font-size: 11px;
             transform: translateX(-120%) translateY(-50%);
             left: -10px;
 
@@ -112,12 +111,24 @@
 
         &__control-struct {
             position: relative;
-            background: rgba($color: white, $alpha: .6);
+            background: rgba($color: white, $alpha: .5);
             display: grid;
             place-items: center center;
+            border-bottom: 1px solid #222;
 
             p {
                 color: #555;
+            }
+        }
+
+        &__fence {
+            position: relative;
+            background: rgba($color: white, $alpha: .65);
+            display: grid;
+            place-items: center center;
+
+            &--second {
+                border-top: 1px solid #222;
             }
         }
     }
