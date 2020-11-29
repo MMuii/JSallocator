@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const minHeight = 75;
 const maxHeight = 500;
 
 const Heap = ({ heap, scale, sizes, addressBase }) => {
+    const [isOverflowing, setOverflowing] = useState(false);
+    const containerRef = useRef();
+
+    useEffect(() => {
+        const { offsetHeight, scrollHeight } = containerRef.current;
+        setOverflowing(offsetHeight < scrollHeight);
+    }, [heap, containerRef]);
+
     const calculateSize = size => {
         const res = size * scale;
         if (res > maxHeight) return maxHeight;
@@ -35,7 +43,6 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                             <p>name: {block.name}</p>
                             <p>size: {block.size}</p>
                             <p>free: {block.free ? 'true' : 'false'}</p>
-                            {/* <button onClick={() => dispatch({ type: 'FREE', payload: { blockToFree: block } })}>Free</button> */}
                         </div>
                     </div>
 
@@ -43,6 +50,7 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                         className="block__control-struct"
                         style={{ minHeight: sizes.BLOCK_STRUCT_SIZE }}
                     >
+                        <p>control struct</p>
                         <div className="block__address block__address--top">{address(block.structAddressEnd)}</div>
                         <div className="block__address block__address--bot">
                             {(block.prev && block.prev.blockAddressEnd === block.structAddressStart) 
@@ -57,7 +65,9 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
     
     return (
         <div className="heap">
-            <div className="heap__container">
+            <div className={`heap__container ${isOverflowing ? 'overflowing' : ''}`} 
+                 ref={containerRef}
+            >
                 <div className="block__container">
                     <div className="block__wrapper">
                         <div className="block--bottom" />
@@ -72,7 +82,3 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
 }
 
 export default Heap;
-
-
-                        // {/* next: {block.next ? block.next.id : 'null'}<br/> */}
-                        // {/* prev: {block.prev ? block.prev.id : 'null'}<br/>  */}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import _ from 'lodash';
 
 // 'Available commands:',
 // 'malloc <block-name> <size> - allocates memory block of given size', //done
@@ -108,7 +109,7 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
         }
 
         dispatch({ type: 'MALLOC', payload: {
-            name: name,
+            name,
             size: parseInt(size),
             callback: msg => log(msg)
         }});
@@ -130,6 +131,45 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
             blockToFree,
             callback: msg => log(msg)
         }})
+    }
+
+    const realloc = ([name, size]) => {
+        if (!isNaN(name)) {
+            log('Invalid argument. Block name must not be a number.');
+            return;
+        }
+
+        if (isNaN(size)) {
+            log('Invalid argument. Block size must be a valid number.');
+            return;
+        }
+
+        // const blockToRealloc = heap[heap.findIndex(block => block.name === name && !block.free)];
+        const blockIndex = heap.findIndex(block => block.name === name && !block.free);
+        const block = heap[blockIndex];
+        if (!block) {
+            log(`Invalid name. There is no block named ${name} on the heap.`);
+            return;
+        }
+
+        if (size === block.size) {
+            log(`Reallocating block named ${block.name} to the same size - nothing happens`);
+            return;
+        }
+
+        if (size === '0') {
+            dispatch({ type: 'FREE', payload: {
+                blockToFree: block,
+                callback: msg => log(msg)
+            }});
+            return;
+        }
+
+        dispatch({ type: 'REALLOC', payload: {
+            blockIndex,
+            size: parseInt(size),
+            callback: msg => log(msg)
+        }});
     }
 
     const info = ([name]) => {
@@ -255,6 +295,12 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
     }
 
     const processInput = () => {
+        if (!text) {
+            log('');
+            setText('');
+            return;
+        }
+
         const input = text.trim().split(' ');
         const command = input[0];
         const args = input.slice(1, input.length);
@@ -283,6 +329,9 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
                 break;
             case 'free': 
                 free(args);
+                break;
+            case 'realloc':
+                realloc(args);
                 break;
             case 'info': 
                 info(args);

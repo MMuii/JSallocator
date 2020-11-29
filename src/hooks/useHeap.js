@@ -1,27 +1,17 @@
 import { useReducer } from 'react';
+import { useHistory } from './useHistory';
+import _, { update } from 'lodash';
 
 const reducer = (state, action) => {
     const { heap } = state;
     const { BLOCK_STRUCT_SIZE } = state.sizes;
+    const { history } = action;
 
     const getBlockIndex = block => heap.findIndex(el => el.name === block.name);
-    const newHistoryEntry = ({ heap, sizes, settings }) => {
-        // const historyEntry = { heap, sizes, settings };
-        // const clone = Object.assign({}, historyEntry);
-        // return clone;
-        
-        // return {
-        //     heap, sizes, settings
-        // }
-
-        return Object.assign({}, heap, sizes, settings);
-    }
-    const updateStateWithHistory = newState => {
-        return { 
-            ...newState,
-            history: [...state.history, newHistoryEntry(newState)],
-            currentStateIndex: state.currentStateIndex + 1
-        }
+    const updateStateWithHistory = changes => {
+        const newState = { ...state, ...changes };
+        history.push(_.cloneDeep(newState));
+        return newState;
     }
 
     switch (action.type) {
@@ -38,10 +28,7 @@ const reducer = (state, action) => {
 
                 callback(`Allocated block ${name} with size of ${size}.`);
 
-                return updateStateWithHistory({
-                    ...state,
-                    heap: updatedHeap
-                });
+                return updateStateWithHistory({ heap: updatedHeap });
             }
 
             const lastBlock = updatedHeap[heap.length - 1];
@@ -65,10 +52,7 @@ const reducer = (state, action) => {
 
             callback(`Allocated block ${name} with size of ${size}.`);
 
-            return updateStateWithHistory({
-                ...state,
-                heap: [...updatedHeap, newBlock]
-            });
+            return updateStateWithHistory({ heap: [...updatedHeap, newBlock] });
         } 
 
         case 'FREE': {
@@ -93,15 +77,9 @@ const reducer = (state, action) => {
             if (!firstUsed) {
                 if (firstFree.prev) {
                     firstFree.prev.next = null;
-                } else {
-                    return updateStateWithHistory({
-                        ...state,
-                        heap: []
-                    });
-                }
+                } else return updateStateWithHistory({ heap: [] });
 
                 return updateStateWithHistory({
-                    ...state,
                     heap: updatedHeap.slice(0, updatedHeap.length - 1)
                 });
             } else {
@@ -115,23 +93,102 @@ const reducer = (state, action) => {
 
                 updatedHeap = updatedHeap.filter((b, index) => index <= firstFreeIndex || index >= firstUsedIndex);
 
-                return updateStateWithHistory({
-                    ...state,
-                    heap: updatedHeap
-                });
+                return updateStateWithHistory({ heap: updatedHeap });
             }
         }
 
-        case 'HEAP_CLEAR': {
-            return updateStateWithHistory({
-                ...state,
-                heap: []
+        case 'REALLOC': {
+            const { blockIndex, size } = action.payload;
+
+            const updatedHeap = heap.slice();
+            //const block = { ...updatedHeap[blockIndex] };
+            const block = updatedHeap[blockIndex];
+
+            //block is being reallocated to smaller size or next block doesnt exist
+            //or there is a free, big enough gap between reallocated and its next block
+            //in that scenarios all realloc has to do is just reducing block size
+            if ((size < block.size || !block.next) ||
+                (block.next.structAddressStart - block.blockAddressEnd) >= (size - block.size)) {
+                console.log('Reallocating to smaller size or filling gap between blocks');
+                block.size = size;
+                block.blockAddressEnd = block.structAddressEnd + size;
+                updatedHeap.splice(blockIndex, 1, block);
+
+                return updateStateWithHistory({ heap: updatedHeap });
+            }
+
+            //next block from reallocated one is free, so realloc will try to subtract needed space from next block 
+            //and add it to the reallocated one
+            if (block.next.free) {
+                const sizeDiff = size - block.size; //how many more bytes will be added to reallocated block's size
+                const gap = block.next.structAddressStart - block.blockAddressEnd;
+                // const nextBlock = { ...block.next };
+                const nextBlock = block.next;
+                const subtractedFromNext = sizeDiff - gap;
+
+                if (nextBlock.size > subtractedFromNext) {
+                    console.log('Reallocate with merge with next block');
+                    block.size = size;
+                    block.blockAddressEnd = block.structAddressEnd + size;
+
+                    nextBlock.size -= subtractedFromNext;
+                    nextBlock.structAddressStart = block.blockAddressEnd;
+                    nextBlock.structAddressEnd = nextBlock.structAddressStart + BLOCK_STRUCT_SIZE;
+                    nextBlock.blockAddressEnd = nextBlock.structAddressEnd + nextBlock.size;
+
+                    updatedHeap.splice(blockIndex, 2, block, nextBlock);
+
+                    return updateStateWithHistory({ heap: updatedHeap });
+                } 
+                
+                else if (nextBlock.size === subtractedFromNext) { //zabiera cały size kolejnego bloku i go usuwa
+                    console.log('Reallocate with merge with next block but next block freed');
+                    const nextNextBlock = { ...nextBlock.next };
+
+                    block.size = size;
+                    block.blockAddressEnd = block.structAddressEnd + size;
+
+                    block.next = nextNextBlock;
+                    nextNextBlock.prev = block;
+
+                    //deletes block, nextBlock and nextNext: [el, el, block, nextBlock, nextNextBlock, el, el]
+                    //and adds new blocks in their place: [el, el, updatedBlock, updatedNextNextBlock, el, el]
+                    updatedHeap.splice(blockIndex, 3, block, nextNextBlock);
+
+                    return updateStateWithHistory({ heap: updatedHeap });
+                }
+            }
+
+            console.log('Realloc mallocowal normalnie');
+
+            action.dispatch({ 
+                type: 'FREE', 
+                history, 
+                payload: { 
+                    blockToFree: block, 
+                    callback: action.payload.callback 
+                }
             });
+
+            action.dispatch({
+                type: 'MALLOC',
+                history,
+                payload: {
+                    name: block.name,
+                    size,
+                    callback: action.payload.callback
+                }
+            }); 
+
+            return state;
+        }
+
+        case 'HEAP_CLEAR': {
+            return updateStateWithHistory({ heap: [] });
         }
 
         case 'CHANGE_SETTINGS': {
             return updateStateWithHistory({
-                ...state,
                 settings: {
                     ...state.settings,
                     ...action.payload
@@ -140,40 +197,25 @@ const reducer = (state, action) => {
         }
 
         case 'UNDO': {
-            const { history, currentStateIndex } = state;
+            const prevState = history.undo();
+            console.log('prevState', prevState);
+            if (!prevState) {
+                action.payload.callback('Cannot undo anymore');
+                return state;
+            }
 
-            console.log('history', history);
-            return state;
-
-            // if (currentStateIndex === 0) {
-            //     action.payload.callback('Cannot undo anymore');
-            //     return state;
-            // }
-
-            // const prevState = history[currentStateIndex - 1];
-
-            // return {
-            //     ...prevState,
-            //     history,
-            //     currentStateIndex: currentStateIndex - 1
-            // }
+            return prevState;
         }
 
         case 'REDO': {
-            const { history, currentStateIndex } = state;
-
-            if (currentStateIndex === history.length - 1) {
+            const nextState = history.redo();
+            console.log('nextState', nextState);
+            if (!nextState) {
                 action.payload.callback('Cannot redo anymore');
                 return state;
             }
 
-            const nextState = history[currentStateIndex + 1];
-
-            return {
-                ...nextState,
-                history,
-                currentStateIndex: currentStateIndex + 1
-            }
+            return nextState;
         }
 
         default:
@@ -185,7 +227,7 @@ const initialHeap = {
     heap: [],
     sizes: {
         HEAP_SIZE: 1024,
-        BLOCK_STRUCT_SIZE: 32
+        BLOCK_STRUCT_SIZE: 32,
     },
     settings: {
         scale: .3,
@@ -195,17 +237,22 @@ const initialHeap = {
 }
 
 export const useHeap = () => {
-    const [{ heap, history, currentStateIndex, sizes, settings }, dispatch] = useReducer(reducer, {
-        ...initialHeap,
-        history: [initialHeap],
-        currentStateIndex: 0
-    });
+    const [undo, redo, push, currentState] = useHistory(initialHeap);
+
+    const [{ heap, sizes, settings }, dispatch] = useReducer(reducer, initialHeap);
 
     return [
         heap,
-        { heap, settings, history, currentStateIndex},
+        { heap, sizes, settings }, //debug
         sizes,
         settings,
-        dispatch
+        ({ type, payload = {} }) => dispatch({ 
+            type,
+            history: { undo, redo, push, currentState }, 
+            dispatch,
+            payload: { 
+                ...payload, 
+            } 
+        }) 
     ]
 }
