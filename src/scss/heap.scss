@@ -72,7 +72,6 @@
         &__wrapper {
             position: relative;
             width: 100%;
-            // border: 1px solid rgba($color: black, $alpha: .5);
         }
 
         &__address {
@@ -94,7 +93,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            background: rgba($color: white, $alpha: .8);
+            background: var(--block-color);
             width: 100%;
             height: 100%;
             padding: 15px 0 15px 15px;
@@ -111,7 +110,7 @@
 
         &__control-struct {
             position: relative;
-            background: rgba($color: white, $alpha: .5);
+            background: var(--struct-color);
             display: grid;
             place-items: center center;
             border-bottom: 1px solid #222;
@@ -123,13 +122,24 @@
 
         &__fence {
             position: relative;
-            background: rgba($color: white, $alpha: .65);
+            background: var(--fence-color);
             display: grid;
             place-items: center center;
+            height: 20px;
+
+            p {
+                color: #777;
+            }
 
             &--second {
                 border-top: 1px solid #222;
             }
+        }
+        
+        &__fence--freed {
+            position: relative;
+            background: var(--block-color);
+            height: 20px;
         }
     }
 }

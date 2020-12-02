@@ -28,11 +28,16 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                     className="block__container"
                     key={block.name} 
                 >
-                    <div className="block__fence block__fence--second">
-                        fence
-                        <div className="block__address block__address--top">{address(block.secondFenceEnd)}</div>
-                        <div className="block__address block__address--bot">{address(block.secondFenceStart)}</div>
-                    </div>
+                    {block.free 
+                        ? <div className="block__fence--freed" />
+                        : (
+                            <div className="block__fence block__fence--second">
+                                <p>fence</p>
+                                <div className="block__address block__address--top">{address(block.secondFenceEnd)}</div>
+                                <div className="block__address block__address--bot">{address(block.secondFenceStart)}</div>
+                            </div>
+                        )
+                    }
 
                     <div className="block__wrapper">
                         <div 
@@ -45,11 +50,16 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                         </div>
                     </div>
 
-                    <div className="block__fence block__fence--first">
-                        fence
-                        <div className="block__address block__address--top">{address(block.blockStart)}</div>
-                        <div className="block__address block__address--bot">{address(block.firstFenceStart)}</div>
-                    </div>
+                    {block.free
+                        ? <div className="block__fence--freed" /> 
+                        : (
+                            <div className="block__fence block__fence--first">
+                                <p>fence</p>
+                                <div className="block__address block__address--top">{address(block.blockStart)}</div>
+                                <div className="block__address block__address--bot">{address(block.firstFenceStart)}</div>
+                            </div>
+                        )
+                    }
 
                     <div 
                         className="block__control-struct"

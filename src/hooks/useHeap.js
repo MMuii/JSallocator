@@ -19,7 +19,7 @@ const reducer = (state, action) => {
             const { name, size, callback } = action.payload
             const updatedHeap = heap.slice();
 
-            const freeBlock = heap.find(block => block.free && block.size >= size);
+            const freeBlock = heap.find(block => block.free && block.size >= size + 2 * FENCE_SIZE);
             if (freeBlock) {
                 freeBlock.name = name;
                 freeBlock.size = size;
