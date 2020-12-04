@@ -4,6 +4,9 @@ Idea for this project came after I wrote an implementation of memory allocator a
 
 My visualization works almost the same as the student project implementation I wrote - it uses first-fit allocation alghoritm. There are three main functions you can use: malloc, free and realloc. I skipped calloc, because it would work exactly like malloc. Below, I explain how these functions work.
 
+## Live demo
+<http://mmuii.github.io/JSallocator>
+
 ## Core functionality
 My visualization works almost the same as the student project I made - it uses first-fit allocation alghoritm. There are three main functions you can use: malloc, free and realloc. I skipped calloc, because it would work exactly like malloc. Below, I explain how these functions work. Besides of that, there are more usefull features, like displaying block addresses, both in dec or hex form.
 
