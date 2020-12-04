@@ -11,20 +11,20 @@ My visualization works almost the same as the student project I made - it uses f
 You control whole app by typing commands in a terminal-looking window. Here are all the commands you can use:
 
 **Available commands**:
-**malloc <block-name> <size>** - allocates memory block of given size
-**free <block-name>** - frees memory block of given name
-**realloc <block-name> <size>** - reallocates given block to a different size
-**info <block-name>** - logs block properties
-**heap** - logs heap state
-**heap clear** - empties heap to default state
-**heap log <on/off>** - logs whole heap each time it changes
-**clear** - clears the terminal
-**undo** - undoes last action
-**redo** - redoes undid action
-**zoom <in/out>** - increases or decreases heap render scale
-**address <dec/hex>** - changes number base of displayed memory addresses
-**about** - about the project
-**github** - opens project github page
+- **malloc <block-name> <size>** - allocates memory block of given size
+- **free <block-name>** - frees memory block of given name
+- **realloc <block-name> <size>** - reallocates given block to a different size
+- **info <block-name>** - logs block properties
+- **heap** - logs heap state
+- **heap clear** - empties heap to default state
+- **heap log <on/off>** - logs whole heap each time it changes
+- **clear** - clears the terminal
+- **undo** - undoes last action
+- **redo** - redoes undid action
+- **zoom <in/out>** - increases or decreases heap render scale
+- **address <dec/hex>** - changes number base of displayed memory addresses
+- **about** - about the project
+- **github** - opens project github page
 
 ## Core functions algorithms
 **malloc** - It iterates through heap and tries to find a freed block with smaller or equal size as the block user want to allocate. If it finds nothing, it simply allocates new block at the end of the heap.
