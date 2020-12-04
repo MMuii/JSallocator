@@ -377,11 +377,24 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
                 break;
             case 'about': 
                 log([
-                    'Author: Marcin Świderek'
+                    'Author: Marcin Świderek',
+                    'Project repo: https://github.com/MMuii/JSallocator',
+                    '',
+                    'JSAllocator is a visualization of a really simple first-fit memory allocator.',
+                    '',
+                    'The idea for this project came after I wrote an implementation of memory allocator as a student project. While debugging the student project, I helped myself understand whats going on by drawing heap step by step in a spreadsheet. It worked, but it wasn\'t too effective. When I finally finished, I came up with idea to create a tool that would help people implementing similiar, simple allocators.',
+                    '',
+                    'My visualization works almost the same as the student project implementation I wrote - it uses first-fit allocation alghoritm. There are three main functions you can use: malloc, free and realloc. I skipped calloc, because it would work exactly like malloc. Below, I explain how these functions work.',
+                    '',
+                    'malloc - It iterates through heap and tries to find a freed block with smaller or equal size as the block user want to allocate. If it finds nothing, it simply allocates new block at the end of the heap.',
+                    '',
+                    'free - If the block to be freed is at the end of the heap, function removes it. If not, block is marked as free and function checks if there is another free block before or after freed block. If there are any, they are merged into one block.',
+                    '',
+                    'realloc - There are few cases when realloc finishes its job really quickly. If new size is equal to current reallocated block\'s size, realloc does exactly nothing. If new size is smaller, block size is simply changed to new, smaller size. Same thing happens when reallocated block is located at the end of the heap - it\'s size is changed to new size, and that\'s all. If none of these cases occurs, things are getting a little bit more complicated. Firstly, realloc checks if there is a free block after reallocated block with an equal or smaller size, than difference between new size and reallocated block\'s size. If there is such a block, then realloc "steals" some of its size and adds to reallocated block. And, finally, if none of the above happens, realloc works like malloc, allocating new block of desired size, and then frees previous block with free function.',
                 ]);
                 break;
             case 'github':
-                window.open('https://github.com/MMuii', '_blank');
+                window.open('https://github.com/MMuii/JSallocator', '_blank');
                 break;
             default: 
                 log('Unknown command: ' + text);
