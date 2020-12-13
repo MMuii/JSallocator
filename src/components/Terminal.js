@@ -351,7 +351,7 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
             case 'help': 
                 log([
                     'Available commands:',
-                    'malloc <size> - allocates memory block of given size', //done (?)
+                    'malloc <block-name> <size> - allocates memory block of given size', //done (?)
                     'free <block-name> - frees memory block of given name',
                     'realloc <block-name> <size> - reallocates given block to a different size',
                     'info <block-name> - logs block properties',

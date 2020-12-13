@@ -14,7 +14,7 @@ My visualization works almost the same as the student project I made - it uses f
 You control whole app by typing commands in a terminal-looking window. Here are all the commands you can use:
 
 **Available commands**:
-- **malloc <block-name> <size>** - allocates memory block of given size
+- **malloc  <block-name> <size>** - allocates memory block of given size
 - **free <block-name>** - frees memory block of given name
 - **realloc <block-name> <size>** - reallocates given block to a different size
 - **info <block-name>** - logs block properties
@@ -29,7 +29,7 @@ You control whole app by typing commands in a terminal-looking window. Here are 
 - **about** - about the project
 - **github** - opens project github page
 
-## Core functions algorithms
+## Malloc, free and realloc algorithms
 **malloc** - It iterates through heap and tries to find a freed block with smaller or equal size as the block user want to allocate. If it finds nothing, it simply allocates new block at the end of the heap.
 
 **free** - If the block to be freed is at the end of the heap, function removes it. If not, block is marked as free and function checks if there is another free block before or after freed block. If there are any, they are merged into one block.
