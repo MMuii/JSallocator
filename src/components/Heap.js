@@ -28,7 +28,7 @@ const Heap = ({ heap, sizes, addressBase }) => {
                         ? <div className="block__fence--freed" />
                         : (
                             <div className="block__fence block__fence--second">
-                                <p>fence</p>
+                                <p>fence - {sizes.FENCE_SIZE} bytes</p>
                                 <div className="block__address block__address--top">{address(block.secondFenceEnd)}</div>
                                 <div className="block__address block__address--bot">{address(block.secondFenceStart)}</div>
                             </div>
@@ -47,7 +47,7 @@ const Heap = ({ heap, sizes, addressBase }) => {
                         ? <div className="block__fence--freed" /> 
                         : (
                             <div className="block__fence block__fence--first">
-                                <p>fence</p>
+                                <p>fence - {sizes.FENCE_SIZE} bytes</p>
                                 <div className="block__address block__address--top">{address(block.blockStart)}</div>
                                 <div className="block__address block__address--bot">{address(block.firstFenceStart)}</div>
                             </div>
@@ -58,7 +58,7 @@ const Heap = ({ heap, sizes, addressBase }) => {
                         className="block__control-struct"
                         style={{ minHeight: sizes.BLOCK_STRUCT_SIZE }}
                     >
-                        <p>control struct</p>
+                        <p>control struct - {sizes.STRUCT_SIZE} bytes</p>
                         <div className="block__address block__address--bot">
                             {(block.prev && !block.prev.free && block.prev.secondFenceEnd === block.structStart) 
                                 ? '' 

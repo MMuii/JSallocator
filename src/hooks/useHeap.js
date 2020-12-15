@@ -204,31 +204,13 @@ const reducer = (state, action) => {
             });
         }
 
-        case 'CHANGE_FENCE_SIZE': {
-            const { FENCE_SIZE } = action.payload;
+        case 'CHANGE_SIZE': {
+            const FENCE_SIZE = action.payload.FENCE_SIZE ? action.payload.FENCE_SIZE : state.sizes.FENCE_SIZE;
+            const STRUCT_SIZE = action.payload.STRUCT_SIZE ? action.payload.STRUCT_SIZE : state.sizes.STRUCT_SIZE;
             const newHeap = heap.slice();
 
             newHeap.forEach(block => {
-                block.blockStart = block.firstFenceStart + FENCE_SIZE;
-                block.secondFenceStart = block.blockStart + block.size;
-                block.secondFenceEnd = block.secondFenceStart + FENCE_SIZE;
-            });
-
-            return updateStateWithHistory({
-                ...state,
-                heap: newHeap,
-                sizes: {
-                    ...state.sizes,
-                    ...action.payload
-                }
-            });
-        }
-
-        case 'CHANGE_STRUCT_SIZE': {
-            const { STRUCT_SIZE } = action.payload;
-            const newHeap = heap.slice();
-
-            newHeap.forEach(block => {
+                block.structStart = block.prev ? block.prev.secondFenceEnd : 0;
                 block.firstFenceStart = block.structStart + STRUCT_SIZE;
                 block.blockStart = block.firstFenceStart + FENCE_SIZE;
                 block.secondFenceStart = block.blockStart + block.size;
@@ -242,7 +224,7 @@ const reducer = (state, action) => {
                     ...state.sizes,
                     ...action.payload
                 }
-            });
+            })
         }
 
         case 'UNDO': {

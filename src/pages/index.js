@@ -20,6 +20,7 @@ const IndexPage = () => {
             <div className="wrapper">
                 <Terminal 
                     heap={heap}
+                    sizes={sizes}
                     settings={settings}
                     dispatch={dispatch}
                     terminal={terminal}

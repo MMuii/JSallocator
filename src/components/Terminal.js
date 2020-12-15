@@ -27,6 +27,10 @@ const commandsData = {
         template: 'size fence <amount> or size struct <amount>',
         argsAmount: [2]
     },
+    sizes: {
+        template: 'sizes',
+        argsAmount: [0]
+    },
     help: {
         template: 'help',
         argsAmount: [0]
@@ -58,7 +62,7 @@ const commandsData = {
     }
 }
 
-const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) => {
+const Terminal = ({ heap, sizes, settings, dispatch, terminal, log, clearTerminal }) => {
     const [text, setText] = useState('');
     const [focused, setFocused] = useState(false);
     const terminalRef = useRef();
@@ -208,10 +212,10 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
         }
 
         const key = arg1 === 'fence' ? 'FENCE_SIZE' : 'STRUCT_SIZE';
-        const type = arg1 === 'fence' ? 'CHANGE_FENCE_SIZE' : 'CHANGE_STRUCT_SIZE';
+        // const type = arg1 === 'fence' ? 'CHANGE_FENCE_SIZE' : 'CHANGE_STRUCT_SIZE';
 
         dispatch({
-            type,
+            type: 'CHANGE_SIZE',
             payload: { [key]: Number(arg2) }
         });
 
@@ -316,6 +320,13 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
             case 'size':
                 sizeCommands(args);
                 break;
+            case 'sizes':
+                log([
+                    'Sizes:',
+                    `Fence size: ${sizes.FENCE_SIZE}`,
+                    `Struct size: ${sizes.STRUCT_SIZE}`
+                ])
+                break;
             case 'clear': 
                 clearTerminal();
                 break;
@@ -337,6 +348,7 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
                     'heap log <on/off> - logs whole heap each time it changes',
                     'size fence <amount> - changes memory fence size',
                     'size struct <amount> - changes block control struct size',
+                    'sizes - logs current fence and struct sizes',
                     '-------------------',
                     'clear - clears the terminal',
                     'undo - undoes last action',
