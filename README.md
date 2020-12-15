@@ -14,20 +14,20 @@ My visualization works almost the same as the student project I made - it uses f
 You control whole app by typing commands in a terminal-looking window. Here are all the commands you can use:
 
 **Available commands**:
-- **malloc  <block-name> <size>** - allocates memory block of given size
-- **free <block-name>** - frees memory block of given name
-- **realloc <block-name> <size>** - reallocates given block to a different size
-- **info <block-name>** - logs block properties
+- **malloc &lt;block-name&gt; &lt;size&gt;** - allocates memory block of given size
+- **free &lt;block-name&gt;** - frees memory block of given name
+- **realloc &lt;block-name&gt; &lt;size&gt;** - reallocates given block to a different size
+- **info &lt;block-name&gt;** - logs block properties
 - **heap** - logs heap state
 - **heap clear** - empties heap to default state
-- **heap log <on/off>** - logs whole heap each time it changes
-- **size fence <amount>** - changes memory fence size,
-- **size struct <amount>** - changes block control struct size,
+- **heap log &lt;on/off&gt;** - logs whole heap each time it changes
+- **size fence &lt;amount&gt;** - changes memory fence size,
+- **size struct &lt;amount&gt;** - changes block control struct size,
 - **sizes** - logs current fence and struct sizes,
 - **clear** - clears the terminal
 - **undo** - undoes last action
 - **redo** - redoes undid action
-- **address <dec/hex>** - changes number base of displayed memory addresses
+- **address &lt;dec/hex&gt;** - changes number base of displayed memory addresses
 - **about** - about the project
 - **github** - opens project github page
 
