@@ -89,6 +89,11 @@
             }
         }
 
+        &__free-space {
+            text-align: center;
+            padding: 15px 0;
+        }
+
         &__info {
             position: relative;
             display: flex;

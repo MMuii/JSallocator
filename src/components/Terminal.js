@@ -1,23 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import _ from 'lodash';
-
-// 'Available commands:',
-// 'malloc <block-name> <size> - allocates memory block of given size', //done
-// 'free <block-name> - frees memory block of given name', //done
-// 'realloc <block-name> <size> - reallocates given block to a different size',
-// 'info <block-name> - logs block properties', //done
-// 'heap - logs heap state', //done
-// 'heap clear - empties heap to default state', //done 
-// 'heap log <on/off> - logs whole heap each time it changes', //done
-// '-------------------',
-// 'clear - clears the terminal', //done
-// 'undo - undoes last action', //done (?)
-// 'redo - redoes undid action', //done (?)
-// 'zoom <in/out> - increases or decreases heap render scale', //done
-// 'address <dec/hex> - changes number base of displayed memory addresses', //done
-// '-------------------',
-// 'about - about the project', //done (?)
-// 'github - opens project github page' //done
 
 const commandsData = {
     malloc: {
@@ -41,6 +23,10 @@ const commandsData = {
         argsAmount: [0, 1, 2],
         possibleArgs: ['clear', 'log', 'on', 'off']
     },
+    size: {
+        template: 'size fence <amount> or size struct <amount>',
+        argsAmount: [2]
+    },
     help: {
         template: 'help',
         argsAmount: [0]
@@ -56,11 +42,6 @@ const commandsData = {
     redo: {
         template: 'redo',
         argsAmount: [0]
-    },
-    zoom: {
-        template: 'zoom <in/out>',
-        argsAmount: [1],
-        possibleArgs: ['in', 'out']
     },
     address: {
         template: 'address <dec/hex>',
@@ -80,6 +61,7 @@ const commandsData = {
 const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) => {
     const [text, setText] = useState('');
     const [focused, setFocused] = useState(false);
+    const terminalRef = useRef();
     
     const address = num => (settings.addressBase === 'dec') ? num : '0x' + num.toString(16).toUpperCase(); 
  
@@ -210,9 +192,30 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
                 type: 'CHANGE_SETTINGS',
                 payload: { logging: arg2 === 'on' ? true : false }
             });
-            // setLoggingHeap(arg2 === 'on' ? true : false);
             return;
         }
+    }
+
+    const sizeCommands = ([arg1, arg2]) => {
+        if (arg1 !== 'fence' && arg1 !== 'struct') {
+            log(`Invalid argument. Type: size fence <amount> or size struct <amount>`);
+            return;
+        }
+
+        if (isNaN(arg2)) {
+            log('Invalid argument. Size must be a valid number.');
+            return;
+        }
+
+        const key = arg1 === 'fence' ? 'FENCE_SIZE' : 'STRUCT_SIZE';
+        const type = arg1 === 'fence' ? 'CHANGE_FENCE_SIZE' : 'CHANGE_STRUCT_SIZE';
+
+        dispatch({
+            type,
+            payload: { [key]: Number(arg2) }
+        });
+
+        log([`Size of ${arg1} changed to ${arg2}`]);
     }
 
     const logHeap = () => {
@@ -229,41 +232,12 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
         });
     }
 
-    const zoom = ([arg]) => {
-        if (arg !== 'in' && arg !== 'out') {
-            log('Invalid argument. Type: zoom <in/out>');
-            return;
-        }
-
-        if (settings.scale <= .1 && arg === 'out') {
-            log('Cannot zoom out more');
-            return;
-        }
-
-        if (settings.scale >= .5 && arg === 'in') {
-            log('Cannot zoom in more');
-            return;
-        }
-
-        dispatch({ 
-            type: 'CHANGE_SETTINGS', 
-            payload: { scale: settings.scale += (arg === 'in') ? .1 : -.1 }
-        });
-        // setScale(prevScale => prevScale += (arg === 'in') ? .1 : -.1);
-        log(`Zoomed ${arg}`);
-    }
-
     const changeAddressBase = ([base]) => {
-        if (base !== 'dec' && base !== 'hex') {
-            log('Invalid argument. Type: address <dec/hex>');
-            return;
-        }
-
         dispatch({
             type: 'CHANGE_SETTINGS',
             payload: { addressBase: base }
         });
-        // setAddressBase(base);
+
         log(`Changed number base of displayed memory addresses to ${base}.`);
     }
 
@@ -339,6 +313,9 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
             case 'heap':
                 heapCommands(args);
                 break;
+            case 'size':
+                sizeCommands(args);
+                break;
             case 'clear': 
                 clearTerminal();
                 break;
@@ -351,26 +328,24 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
             case 'help': 
                 log([
                     'Available commands:',
-                    'malloc <block-name> <size> - allocates memory block of given size', //done (?)
+                    'malloc <block-name> <size> - allocates memory block of given size', 
                     'free <block-name> - frees memory block of given name',
                     'realloc <block-name> <size> - reallocates given block to a different size',
                     'info <block-name> - logs block properties',
                     'heap - logs heap state',
                     'heap clear - empties heap to default state', 
                     'heap log <on/off> - logs whole heap each time it changes',
+                    'size fence <amount> - changes memory fence size',
+                    'size struct <amount> - changes block control struct size',
                     '-------------------',
                     'clear - clears the terminal',
                     'undo - undoes last action',
                     'redo - redoes undid action',
-                    'zoom <in/out> - increases or decreases heap render scale', //done
                     'address <dec/hex> - changes number base of displayed memory addresses',
                     '-------------------',
-                    'about - about the project', //done (?)
-                    'github - opens project github page' //done
+                    'about - about the project', 
+                    'github - opens project github page'
                 ]);
-                break;
-            case 'zoom':
-                zoom(args);
                 break;
             case 'address':
                 changeAddressBase(args);
@@ -411,6 +386,10 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
         }
     }, [heap]);
 
+    useEffect(() => {
+        terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }, [terminal]);
+
     const renderTerminal = () => {
         return terminal.map((line, index) => {
             return (
@@ -422,7 +401,7 @@ const Terminal = ({ heap, settings, dispatch, terminal, log, clearTerminal }) =>
     }
 
     return (
-        <div className="terminal container">
+        <div className="terminal container" ref={terminalRef}>
             {renderTerminal()}
             <div className="input">
                 <p className="marker">{'>'}</p>

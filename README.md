@@ -24,7 +24,6 @@ You control whole app by typing commands in a terminal-looking window. Here are 
 - **clear** - clears the terminal
 - **undo** - undoes last action
 - **redo** - redoes undid action
-- **zoom <in/out>** - increases or decreases heap render scale
 - **address <dec/hex>** - changes number base of displayed memory addresses
 - **about** - about the project
 - **github** - opens project github page

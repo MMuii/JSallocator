@@ -1,9 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const minHeight = 75;
-const maxHeight = 500;
-
-const Heap = ({ heap, scale, sizes, addressBase }) => {
+const Heap = ({ heap, sizes, addressBase }) => {
     const [isOverflowing, setOverflowing] = useState(false);
     const containerRef = useRef();
 
@@ -11,13 +8,6 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
         const { offsetHeight, scrollHeight } = containerRef.current;
         setOverflowing(offsetHeight < scrollHeight);
     }, [heap, containerRef]);
-
-    const calculateSize = size => {
-        const res = size * scale;
-        if (res > maxHeight) return maxHeight;
-        if (res < minHeight) return minHeight;
-        return res;
-    }
 
     const address = num => (addressBase === 'dec') ? num : '0x' + num.toString(16).toUpperCase(); 
 
@@ -28,6 +18,12 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                     className="block__container"
                     key={block.name} 
                 >
+                    {(block.next && block.secondFenceEnd !== block.next.structStart) && 
+                        <div className="block__free-space">
+                            free space: {block.next.structStart - block.secondFenceEnd} bytes
+                        </div>
+                    }
+
                     {block.free 
                         ? <div className="block__fence--freed" />
                         : (
@@ -40,10 +36,7 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                     }
 
                     <div className="block__wrapper">
-                        <div 
-                            className="block__info"
-                            style={{ minHeight: calculateSize(block.size) }}
-                        >   
+                        <div className="block__info">   
                             <p>name: {block.name}</p>
                             <p>size: {block.size}</p>
                             <p>free: {block.free ? 'true' : 'false'}</p>
@@ -67,7 +60,7 @@ const Heap = ({ heap, scale, sizes, addressBase }) => {
                     >
                         <p>control struct</p>
                         <div className="block__address block__address--bot">
-                            {(block.prev && block.prev.secondFenceEnd === block.structStart) 
+                            {(block.prev && !block.prev.free && block.prev.secondFenceEnd === block.structStart) 
                                 ? '' 
                                 : address(block.structStart)}
                         </div>

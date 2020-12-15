@@ -24,6 +24,8 @@ const reducer = (state, action) => {
                 freeBlock.name = name;
                 freeBlock.size = size;
                 freeBlock.free = false;
+                freeBlock.firstFenceStart = freeBlock.structStart + STRUCT_SIZE;
+                freeBlock.blockStart = freeBlock.firstFenceStart + FENCE_SIZE;
                 freeBlock.secondFenceStart = freeBlock.blockStart + freeBlock.size;
                 freeBlock.secondFenceEnd = freeBlock.secondFenceStart + FENCE_SIZE;
 
@@ -53,20 +55,6 @@ const reducer = (state, action) => {
                 secondFenceEnd
             }
 
-            // const structAddressStart = lastBlock ? lastBlock.blockAddressEnd : 0;
-            // const structAddressEnd = structAddressStart + BLOCK_STRUCT_SIZE;
-            // const blockAddressEnd = structAddressEnd + size;
-
-            // const newBlock = {
-            //     name,
-            //     prev: lastBlock ? lastBlock : null,
-            //     next: null,
-            //     size,
-            //     free: false,
-            //     structAddressStart,
-            //     structAddressEnd,
-            //     blockAddressEnd
-            // }
 
             if (lastBlock) lastBlock.next = newBlock;
 
@@ -76,7 +64,7 @@ const reducer = (state, action) => {
         } 
 
         case 'FREE': {
-            //TODO - uaktualnianie adresów przy mergowaniu (?) to chyba dalej nie jest zrobione ale nie pamietam o co chodziło XD
+            //TODO - nie dziala gdy zwolnie blok size 100 a potem zaalokuje blok size 100
             const { blockToFree, callback } = action.payload;
 
             if (blockToFree.free === true) {
@@ -90,9 +78,6 @@ const reducer = (state, action) => {
             const cur = updatedHeap[getBlockIndex(blockToFree)];
             cur.free = true;
             cur.name += ' (freed)';
-            //deleting fences and adding twice the fence size to block size
-            cur.blockStart = cur.firstFenceStart;
-            cur.secondFenceStart = cur.secondFenceEnd;
 
             const firstFree = (cur.prev && cur.prev.free) ? cur.prev : cur;
             const firstUsed = updatedHeap.find((block, index) => index > getBlockIndex(firstFree) && !block.free);
@@ -109,11 +94,10 @@ const reducer = (state, action) => {
                 firstFree.next = firstUsed;
                 firstUsed.prev = firstFree;
 
-                firstFree.size = firstUsed.structStart - firstFree.blockStart;
+                firstFree.blockStart = firstFree.firstFenceStart;
                 firstFree.secondFenceStart = firstUsed.structStart;
                 firstFree.secondFenceEnd = firstUsed.structStart;
-                // firstFree.size = firstUsed.structAddressStart - firstFree.structAddressEnd;
-                //firstFree.blockAddressEnd = firstUsed.structAddressStart;
+                firstFree.size = firstUsed.structStart - firstFree.blockStart;
                 
                 const firstFreeIndex = getBlockIndex(firstFree);
                 const firstUsedIndex = getBlockIndex(firstUsed);
@@ -132,11 +116,9 @@ const reducer = (state, action) => {
             //block is being reallocated to smaller size or next block doesnt exist
             //or there is a free, big enough gap between reallocated and its next block
             //in that scenarios all realloc has to do is just reducing block size
-            if ((size < block.size || !block.next) ||                                                           //TO POWINNO DZIALAC Z PLOTKAMI
+            if ((size < block.size || !block.next) ||                                                          
                 (block.next.structStart - block.secondFenceEnd) >= (size - block.size)) {
-                console.log('Reallocating to smaller size or filling gap between blocks');
                 block.size = size;
-                // block.blockAddressEnd = block.structAddressEnd + size;
                 block.secondFenceStart = block.blockStart + block.size;
                 block.secondFenceEnd = block.secondFenceStart + FENCE_SIZE;
                 updatedHeap.splice(blockIndex, 1, block);
@@ -153,16 +135,9 @@ const reducer = (state, action) => {
                 const subtractedFromNext = sizeDiff - gap;
 
                 if (nextBlock.size > subtractedFromNext) {
-                    console.log('Reallocate with merge with next block');
                     block.size = size;
-                    //block.blockAddressEnd = block.structAddressEnd + size;
                     block.secondFenceStart = block.blockStart + block.size;
                     block.secondFenceEnd = block.secondFenceStart + FENCE_SIZE;
-
-                    // nextBlock.size -= subtractedFromNext;
-                    // nextBlock.structAddressStart = block.blockAddressEnd;
-                    // nextBlock.structAddressEnd = nextBlock.structAddressStart + STRUCT_SIZE;
-                    // nextBlock.blockAddressEnd = nextBlock.structAddressEnd + nextBlock.size;
 
                     nextBlock.size -= subtractedFromNext;
                     nextBlock.structStart = block.secondFenceEnd;
@@ -177,11 +152,9 @@ const reducer = (state, action) => {
                 } 
                 
                 else if (nextBlock.size === subtractedFromNext) { //zabiera cały size kolejnego bloku i go usuwa
-                    console.log('Reallocate with merge with next block but next block freed');
                     const nextNextBlock = { ...nextBlock.next };
 
                     block.size = size;
-                    // block.blockAddressEnd = block.structAddressEnd + size;
                     block.secondFenceStart = block.blockStart + block.size;
                     block.secondFenceEnd = block.secondFenceStart + FENCE_SIZE;
 
@@ -195,8 +168,6 @@ const reducer = (state, action) => {
                     return updateStateWithHistory({ heap: updatedHeap });
                 }
             }
-
-            console.log('Realloc mallocowal normalnie');
 
             action.dispatch({ 
                 type: 'FREE', 
@@ -233,9 +204,49 @@ const reducer = (state, action) => {
             });
         }
 
+        case 'CHANGE_FENCE_SIZE': {
+            const { FENCE_SIZE } = action.payload;
+            const newHeap = heap.slice();
+
+            newHeap.forEach(block => {
+                block.blockStart = block.firstFenceStart + FENCE_SIZE;
+                block.secondFenceStart = block.blockStart + block.size;
+                block.secondFenceEnd = block.secondFenceStart + FENCE_SIZE;
+            });
+
+            return updateStateWithHistory({
+                ...state,
+                heap: newHeap,
+                sizes: {
+                    ...state.sizes,
+                    ...action.payload
+                }
+            });
+        }
+
+        case 'CHANGE_STRUCT_SIZE': {
+            const { STRUCT_SIZE } = action.payload;
+            const newHeap = heap.slice();
+
+            newHeap.forEach(block => {
+                block.firstFenceStart = block.structStart + STRUCT_SIZE;
+                block.blockStart = block.firstFenceStart + FENCE_SIZE;
+                block.secondFenceStart = block.blockStart + block.size;
+                block.secondFenceEnd = block.secondFenceStart + FENCE_SIZE;
+            });
+
+            return updateStateWithHistory({
+                ...state,
+                heap: newHeap,
+                sizes: {
+                    ...state.sizes,
+                    ...action.payload
+                }
+            });
+        }
+
         case 'UNDO': {
             const prevState = history.undo();
-            console.log('prevState', prevState);
             if (!prevState) {
                 action.payload.callback('Cannot undo anymore');
                 return state;
@@ -246,7 +257,6 @@ const reducer = (state, action) => {
 
         case 'REDO': {
             const nextState = history.redo();
-            console.log('nextState', nextState);
             if (!nextState) {
                 action.payload.callback('Cannot redo anymore');
                 return state;
@@ -268,7 +278,6 @@ const initialHeap = {
         FENCE_SIZE: 16
     },
     settings: {
-        scale: .3,
         addressBase: 'dec',
         logging: false
     }
@@ -281,7 +290,6 @@ export const useHeap = () => {
 
     return [
         heap,
-        { heap, sizes, settings }, //debug
         sizes,
         settings,
         ({ type, payload = {} }) => dispatch({ 
