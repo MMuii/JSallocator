@@ -88,6 +88,11 @@ const Terminal = ({ heap, sizes, settings, dispatch, terminal, log, clearTermina
             return;
         }
 
+        if (size <= 0) {
+            log('Invalid argument. Block size must be greater than 0.');
+            return;
+        }
+
         //dodany warunek !block.free - do stestowania
         if (heap.findIndex(block => block.name === name && !block.free) !== -1) {
             log('Pick different block name. There is already block with this name on the heap.');
@@ -127,6 +132,11 @@ const Terminal = ({ heap, sizes, settings, dispatch, terminal, log, clearTermina
 
         if (isNaN(size)) {
             log('Invalid argument. Block size must be a valid number.');
+            return;
+        }
+
+        if (size <= 0) {
+            log('Invalid argument. Block size must be greater than 0.');
             return;
         }
 
