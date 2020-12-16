@@ -13,6 +13,7 @@
         flex-direction: column;
         align-items: flex-start;
         overflow-y: scroll;
+        position: relative;
 
         &::-webkit-scrollbar {
             width: 8px;
@@ -78,3 +79,9 @@
         }
     }
 }
+
+// .author {
+//     position: absolute;
+//     top: 110%;
+//     left: 0;
+// }

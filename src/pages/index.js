@@ -27,6 +27,11 @@ const IndexPage = () => {
                     log={log}
                     clearTerminal={clearTerminal}
                 />
+    
+                <div className="author">
+                    made by 
+                    <a href="https://github.com/MMuii/" target="_blank"> mmuii</a>
+                </div>
 
                 <Heap 
                     heap={heap}
