@@ -59,11 +59,12 @@ const Heap = ({ heap, sizes, addressBase }) => {
                         style={{ minHeight: sizes.BLOCK_STRUCT_SIZE }}
                     >
                         <p>control struct - {sizes.STRUCT_SIZE} bytes</p>
-                        <div className="block__address block__address--bot">
-                            {(block.prev && !block.prev.free && block.prev.secondFenceEnd === block.structStart) 
-                                ? '' 
-                                : address(block.structStart)}
-                        </div>
+                        {block.free && (
+                            <div className="block__address block__address--top">{address(block.blockStart)}</div>
+                        )}
+                        {!(block.prev && !block.prev.free && block.prev.secondFenceEnd === block.structStart) && (
+                            <div className="block__address block__address--bot">{address(block.structStart)}</div>
+                        )}
                     </div>
                 </div>
             )
