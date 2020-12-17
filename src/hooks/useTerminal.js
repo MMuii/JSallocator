@@ -14,6 +14,8 @@ const initialTerminal = [
     'malloc <block-name> <size> - allocates memory block of given size',
     'free <block-name> - frees memory block of given name',
     'realloc <block-name> <size> - reallocates given block to a different size',
+    'undo - undoes last action',
+    'redo - redoes last action',
     '',
     'To see all commands, type help'
 ]
