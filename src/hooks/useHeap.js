@@ -64,7 +64,6 @@ const reducer = (state, action) => {
         } 
 
         case 'FREE': {
-            //TODO - nie dziala gdy zwolnie blok size 100 a potem zaalokuje blok size 100
             const { blockToFree, callback } = action.payload;
 
             if (blockToFree.free === true) {
